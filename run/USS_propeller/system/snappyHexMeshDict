@@ -1,0 +1,173 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Which of the steps to run
+castellatedMesh true;  // Create the appropriate refinement and identify the internal mesh
+snap            true;  // Snap the boundary points on the real surface
+addLayers       true;  // Add the prism layer mesh to solve the boundary layer
+
+
+// Geometry. Definition of all surfaces. All surfaces are of class
+// searchableSurface.
+// Surfaces are used
+// - to specify refinement for any mesh cell intersecting it
+// - to specify refinement for any mesh cell inside/outside/near
+// - to 'snap' the mesh boundary to the surface
+geometry
+{
+    Tullibee_AMI.stl
+    {
+        type triSurfaceMesh;
+        name AMI;
+    }
+    Tullibee_prop_modelscale.stl
+    {
+        type triSurfaceMesh;
+        name propeller;
+        patchInfo
+        {
+            type wall;
+        }
+    }
+}
+
+
+// Settings for the castellatedMesh generation.
+castellatedMeshControls
+{
+
+    maxLocalCells 100000;
+    maxGlobalCells 8000000;
+    minRefinementCells 0;
+    maxLoadUnbalance 0.1;
+    nCellsBetweenLevels 2;
+
+    features
+    (
+        {
+            file "Tullibee_AMI.eMesh";
+            level 2;
+        }
+        {
+            file "Tullibee_prop_modelscale.eMesh";
+            level 2;
+        }        
+    );
+
+    refinementSurfaces
+    {
+        AMI
+        {
+            // Surface-wise min and max refinement level
+            level (2 2);
+            faceType boundary;
+            cellZone rotatingZone;
+            faceZone rotatingZone;
+            cellZoneInside inside;
+        }
+        propeller
+        {
+            level  (3 3);
+        }
+    }
+    
+    resolveFeatureAngle 30;
+
+    refinementRegions
+    {
+        // AMI{ mode inside; levels ((1E15 3))}
+    }
+
+    locationInMesh (0.08 0.01 0.2);  
+    allowFreeStandingZoneFaces false;
+}
+
+
+
+// Settings for the snapping.
+snapControls
+{
+
+    nSmoothPatch 10;
+    tolerance 4.0;
+    nSolveIter 300;  // Better snapping result
+    nRelaxIter 5;  // How many times the deformations can be reduced to have a correct mesh
+    nFeatureSnapIter 25;
+    // Detect (geometric only) features by sampling the surface // default == false
+    implicitFeatureSnap true;
+    // Use castellatedMeshControls::features (default = true)
+    explicitFeatureSnap false;
+    // Detect points on multiple surfaces (only for explicitFeatureSnap)
+    multiRegionFeatureSnap true;
+}
+
+
+// Settings for the layer addition.
+addLayersControls
+{
+    // Are the thickness parameters below relative to the undistorted
+    // size of the refined cell outside layer (true) or absolute sizes (false).
+    relativeSizes false;
+
+    // Per final patch (so not geometry!) the layer information
+    layers
+    {
+    }
+
+    expansionRatio 1.2;
+    finalLayerThickness 0.01;
+    minThickness 0.0001;
+    nGrow 0;
+    featureAngle 30;
+    nRelaxIter 3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals 3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedialAxisAngle 90;
+    nBufferCellsNoExtrude 0;
+    nLayerIter 50;
+    //nRelaxedIter 20;
+}
+
+
+
+// Generic mesh quality settings. At any undoable phase these determine
+// where to undo.
+
+meshQualityControls
+{
+    #include "meshQualityDict"
+}
+
+// Advanced
+
+// Flags for optional output
+// 0 : only write final meshes
+// 1 : write intermediate meshes
+// 2 : write volScalarField with cellLevel for postprocessing
+// 4 : write current intersections as .obj files
+debug 0;
+
+
+// Merge tolerance. Is fraction of overall bounding box of initial mesh.
+// Note: the write tolerance needs to be higher than this.
+mergeTolerance 1E-6;
+
+
+// ************************************************************************* //

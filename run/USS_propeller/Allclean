@@ -1,0 +1,18 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/CleanFunctions      # Tutorial clean functions
+#------------------------------------------------------------------------------
+
+# Remove surface and features
+rm -rf constant/polyMesh
+rm -rf constant/extendedFeatureEdgeMesh
+
+# Remove Processor and log files
+rm -rf processor*
+rm -rf postProcessing
+rm -rf log.*
+
+# Remove 0 folder properties
+rm -rf 0
+
+#------------------------------------------------------------------------------

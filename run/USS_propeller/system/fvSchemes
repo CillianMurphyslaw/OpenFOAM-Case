@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                |
+| \\      /  F ield         | cfMesh: A library for mesh generation          |
+|  \\    /   O peration     |                                                |
+|   \\  /    A nd           | Author: Franjo Juretic                         |
+|    \\/     M anipulation  | E-mail: franjo.juretic@c-fields.com            |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version   2.0;
+    format    ascii;
+    class     dictionary;
+    location  "system";
+    object    fvSchemes;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+ddtSchemes
+{
+    default         Euler;
+}
+
+gradSchemes
+{
+    default         Gauss linear;
+    //limitedGrad     cellLimited Gauss linear 1;
+    grad(k)       cellLimited Gauss linear 1;
+    grad(omega)   cellLimited Gauss linear 1;
+    grad(p)       cellLimited Gauss linear 1;
+    grad(U)       cellLimited Gauss linear 1;
+}
+
+divSchemes
+{
+    div(phi,U)       Gauss linearUpwind limitedGrad;//linearUpwind grad(U);
+    div(phi,k)       Gauss linearUpwind limitedGrad;//linearUpwind grad(U);// Gauss linearUpwind limitedGrad
+    div(phi,omega)   Gauss linearUpwind limitedGrad;//linearUpwind grad(U);// Gauss linearUpwind limitedGrad
+
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;
+}
+
+laplacianSchemes
+{
+    default         Gauss linear limited corrected 0.5;//limited 0.5; //Gauss linear corrected;
+}
+
+interpolationSchemes
+{
+    default linear;
+}
+
+snGradSchemes
+{
+    default         limited corrected 0.5; //limited 0.5;    // corrected
+}
+
+oversetInterpolation
+{
+}
+
+oversetInterpolationSuppressed
+{
+}
+
+fluxRequired
+{
+    //default no;
+    //p   p;          // 압력 플럭스 계산
+}
+
+wallDist        // 벽에서의 거리를 계산하는 방법 정의
+{
+    method meshWave;    // 메시 기반 거리 계산
+}
+
+
+// ************************************************************************* //

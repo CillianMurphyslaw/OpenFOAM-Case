@@ -1,0 +1,41 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+./Allrun.pre
+
+runApplication decomposePar
+mpirun --hostfile hostfile -np 18 $(getApplication) -parallel > log.$(getApplication) 2>&1 &
+
+#------------------------------------------------------------------------------
+n=0
+
+while(($n<1))
+do
+    sleep 60 # 5분주기
+
+    currentTime=$(date "+%Y-%m-%d %H:%M:%S")
+    echo $currentTime "Detect the output time." >> log.script
+
+    if ls -d [0-9]* | grep -q '^2$' || ls -d processor0/[0-9]* | grep -q '^processor0/2$'; then
+
+        sleep 5
+
+        echo "Change the spacial schemes to be 2nd-order accurate" >> log.script
+        sed -i '/div(phi,k)/s/upwind/linearUpwind limitedGrad/' system/fvSchemes
+        sed -i '/div(phi,omega)/s/upwind/linearUpwind limitedGrad/' system/fvSchemes
+        
+        sed -i '/nOuterCorrectors/s/[0-9]\+/3/' system/fvSolution
+        sed -i '/nCorrectors/s/[0-9]\+/2/' system/fvSolution
+        sed -i '/nNonOrthogonalCorrectors/s/[0-9]\+/1/' system/fvSolution
+
+        n=$((n+1))
+
+        echo "Running the case in background..." >> log.script
+    fi
+done
+
+runApplication reconstructPar
+
+#------------------------------------------------------------------------------

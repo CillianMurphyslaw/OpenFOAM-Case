@@ -1,0 +1,59 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                |
+| \\      /  F ield         | cfMesh: A library for mesh generation          |
+|  \\    /   O peration     |                                                |
+|   \\  /    A nd           | Author: Franjo Juretic                         |
+|    \\/     M anipulation  | E-mail: franjo.juretic@c-fields.com            |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version   2.0;
+    format    ascii;
+    class     dictionary;
+    object    controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application         pimpleFoam;
+
+startFrom           latestTime;     // startTime
+
+startTime           0;
+
+stopAt              endTime;
+
+endTime             5;  // Final end Time = 30 sec
+
+deltaT              0.001;  // less than 0.05, 0.01(L/U)
+
+writeControl        adjustableRunTime;
+
+writeInterval       0.0002;
+
+purgeWrite          0;
+
+writeFormat         ascii;
+
+writePrecision      6;
+
+writeCompression    off;
+
+timeFormat          general;
+
+timePrecision       6;
+
+runTimeModifiable   yes;
+
+adjustTimeStep      yes;  // no
+
+maxCo               1;
+maxDeltaT           0.02;
+
+functions
+{
+    #includeFunc yPlus;
+    #includeFunc Q
+    #include "surfaces"
+}
+
+// ************************************************************************* //

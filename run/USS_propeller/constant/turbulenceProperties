@@ -1,0 +1,29 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "constant";
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+simulationType RAS;     // 난류 모델 RANS // 기타 모델: LES, RAS, Laminar
+
+RAS
+{
+    RASModel            kOmegaSST;  // kOmegaSST 모델  // 기타 모델: kEpsilon, LaunderSharmaKE, SpalartALlmaras 
+
+    turbulence          on;         // 난류 활성화
+
+    printCoeffs         on;         // 난류 모델 계수 콘솔 출력여부
+}
+
+// ************************************************************************* //
